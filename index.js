@@ -19,7 +19,7 @@ const questions = [
       "Add Employee",
       "Add Department",
       "Add Role",
-      "Update Employee Role"
+      "Update Employee Role",
     ],
   },
 ];
@@ -39,7 +39,13 @@ const mainMenu = () => {
       addEmployee();
     }
     if (res.questions === "Add Department") {
-        addDepartment()
+      addDepartment();
+    }
+    if (res.questions === "Add Role") {
+      addRole();
+    }
+    if (res.questions === "Update Employee Role") {
+        updateEmployeeRole()
     }
   });
 };
@@ -105,19 +111,103 @@ const addEmployee = () => {
 };
 
 const addDepartment = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "deptName",
+        message: "What is this department name?",
+      },
+    ])
+    .then((res) => {
+      db.query(`INSERT INTO department SET ?`, {
+        department_name: res.deptName,
+      });
+      console.log(`Department added`);
+      mainMenu();
+    });
+};
+
+const addRole = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "roleName",
+        message: "What is the name of the role?",
+      },
+      {
+        type: "input",
+        name: "salary",
+        message: "What is the salary of the role?",
+      },
+      {
+        type: "input",
+        name: "roleDept",
+        message: "Which department does the role belong to?",
+      },
+    ])
+    .then((res) => {
+      db.query(`INSERT INTO role SET ?`, {
+        title: res.roleName,
+        salary: res.salary,
+        department_id: res.roleDept,
+      });
+      console.log(`Role added`);
+      mainMenu();
+    });
+};
+
+const updateEmployeeRole = () => {
+  db.query(`SELECT * FROM employee`, (err, data) => {
+    if (err) throw err;
+    const employees = data.map(({ id, first_name, last_name }) => ({
+      name: first_name + " " + last_name,
+      value: id,
+    }));
+
     inquirer
-        .prompt([
-            {
-                type: 'input',
-                name: 'deptName',
-                message: 'What is this department name?'
-            }
-        ]).then((res) => {
-            db.query(`INSERT INTO department SET ?`, {
-                department_name: res.deptName
-            }
-            )
-            console.log(`Department added`);
-            mainMenu()
-        })
-}
+      .prompt([
+        {
+          type: "list",
+          name: "name",
+          message: "Which employee would you like to update?",
+          choices: employees,
+        },
+      ])
+      .then((res) => {
+        const employee = res.name;
+        const params = [];
+        params.push(employee);
+        db.query(roleSql, (err, data) => {
+          if (err) throw err;
+
+          const roles = data.map(({ id, title }) => ({
+            name: title,
+            value: id,
+          }));
+          inquirer
+            .prompt([
+              {
+                type: "list",
+                name: "role",
+                message: "What is the employee's new role?",
+                choices: roles,
+              },
+            ])
+            .then((res) => {
+              const role = res.role;
+              params.push(role);
+              let employee = params[0];
+              params[0] = role;
+              params[1] = employee;
+              db.query(`UPDATE employee SET role_id = ? WHERE id = ?`, params, (err, result) => {
+                if (err) throw err;
+                console.log("Employee has been updated!");
+                mainMenu();
+              });
+            });
+        });
+      });
+  });
+};
