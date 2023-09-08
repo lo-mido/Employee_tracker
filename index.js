@@ -22,6 +22,28 @@ const mainMenu = () => {
         if(res.questions === "View All Employees") {
             viewAllEmployees()
         }
+        if(res.questions === "View All Departments") {
+            viewAllDepartments()
+        }
+        if(res.questions === "View All Roles") {
+            viewAllRoles()
+        }
+    })
+}
+
+const viewAllDepartments = () => {
+    db.query("SELECT * FROM department", function(err, res) {
+        if (err) throw err;
+        console.table(res)
+        mainMenu()
+    })
+}
+
+const viewAllRoles = () => {
+    db.query("SELECT * FROM role", function(err, res) {
+        if (err) throw err;
+        console.table(res)
+        mainMenu()
     })
 }
 
