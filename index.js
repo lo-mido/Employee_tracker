@@ -19,7 +19,7 @@ const questions = [
       "Add Employee",
       "Add Department",
       "Add Role",
-      "Update Employee Role",
+      "Update Employee Role"
     ],
   },
 ];
@@ -37,6 +37,9 @@ const mainMenu = () => {
     }
     if (res.questions === "Add Employee") {
       addEmployee();
+    }
+    if (res.questions === "Add Department") {
+        addDepartment()
     }
   });
 };
@@ -100,3 +103,21 @@ const addEmployee = () => {
       mainMenu();
     });
 };
+
+const addDepartment = () => {
+    inquirer
+        .prompt([
+            {
+                type: 'input',
+                name: 'deptName',
+                message: 'What is this department name?'
+            }
+        ]).then((res) => {
+            db.query(`INSERT INTO department SET ?`, {
+                department_name: res.deptName
+            }
+            )
+            console.log(`Department added`);
+            mainMenu()
+        })
+}
