@@ -175,10 +175,11 @@ const updateEmployeeRole = () => {
           choices: employees,
         },
       ])
-      .then((res) => {
-        const employee = res.name;
+      .then((empChoice) => {
+        const employee = empChoice.name;
         const params = [];
         params.push(employee);
+        const roleSql ="SELECT * From role"
         db.query(roleSql, (err, data) => {
           if (err) throw err;
 
